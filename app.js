@@ -1,10 +1,16 @@
 require('typescript-require');
 const mysql = require('mysql2');
 const express = require('express');
+const bodyParser = require('body-parser')
 const app = express();
 const cors = require('cors');
 const helper = require("./utilityFunctions.js");
 const GraphDTO = require('./graph_dto.js');
+const HistoricDTO = require('./historic_data_dto.js');
+const yahooFinance = require('yahoo-finance2').default
+ 
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: false }))
 
 Date.prototype.addHours= function(h){
   this.setHours(this.getHours()+h);
@@ -19,6 +25,8 @@ const con = mysql.createConnection({
   "password":"AVNS_zHy1PorZO9bMRWu5LA1",
   "database":"defaultdb",
   namedPlaceholders: true,
+  supportBigNumbers: true,
+  bigNumberStrings: true
 });
 
 con.connect((err) => {
@@ -27,27 +35,57 @@ con.connect((err) => {
   console.log("Connected!");
 
   
-  /*let sql_company = "CREATE INDEX graph_id_index ON `Edge` (graph);";
-  con.query(sql_company, function (err, result) {
-    if (err) throw err;
-    console.log(result);
+  //let sql_company = "SELECT date FROM Daily_data WHERE stock_id = 1 AND DATE >= '2022-09-01' ORDER BY ABS(DATEDIFF('2022-09-01', date)) ASC";
+  
+  /*on.query("DELETE FROM Graph_Network WHERE id = 23586",(err, res) => {
+
+    console.log(res)
+
   });*/
     
+
+
+
   /*helper.resolveGraphs(
-    helper.getDirectories("C:/Users/patri/Desktop/gauss-complete/8_day")
+    helper.getDirectories("C:/Users/patri/Desktop/dump/parsed_data/1_day")
     .map((directory) => helper.getGraphFromDirectory(directory)),
-    2,
-    con
-  );
-  helper.resolveGraphs(
-    helper.getDirectories("C:/Users/patri/Desktop/gauss-complete/9_day")
-    .map((directory) => helper.getGraphFromDirectory(directory)),
-    2,
+    1,
     con
   );*/
   
+  
     
-    
+  /*con.query("ALTER TABLE Daily_data MODIFY volume BIGINT NOT NULL",(err, res) => {
+      if(err){
+        console.log(err);
+      }  
+      console.log(res);
+    }
+  );*/
+
+  
+  
+  /*let ticker = "^GSPC";
+  let from = "2007-01-03";
+  let to = "2022-10-18";
+  let id = 412;
+    yahooFinance.historical(ticker,{
+                            period1: from,
+                            period2: to,
+                            interval: '1d'  // 'd' (daily), 'w' (weekly), 'm' (monthly), 'v' (dividends only)
+                      })
+                    .then ((quotes) => {
+                      let q = quotes.map(({date, open, high, low, close, volume}) => {
+                        return [date.toISOString().split("T")[0],id,open,high,low,close,volume];
+                      })
+                      con.query("INSERT INTO Daily_data (date, stock_id, open, high, low, close, volume) VALUES ?", [q],(err, res) => {
+                        if(err){
+                          console.log(err);
+                        }  
+                        console.log(res);
+                        }
+                      );
+                    });*/
     
   });
 
@@ -55,9 +93,39 @@ con.connect((err) => {
   
   app.use(cors());
   
-  app.get('/test_graph', function (req, res) {
-    res.end("lol0");
-  })
+
+  app.post("/portfolio/data", (req, res) => {
+
+    const {tickers, range} = req.body;
+    let to = new Date("2022-10-18");
+    let from = new Date(to);
+    switch(range){
+      case "1Month":  from = helper.subtractMonths(to, 1)
+        break;
+      case "3Month":  from = helper.subtractMonths(to, 3)
+        break;
+      case "6Month":  from = helper.subtractMonths(to, 3)
+        break;
+      case "1Year": from = helper.subtractMonths(to, 12)
+        break;
+      case "3Year": from = helper.subtractMonths(to, 36)
+        break;
+      case "All": from = "2007-01-03"
+        break;
+      case "GraphPeriod": from = req.body.from 
+                          to = req.body.to
+        break;
+    }
+
+    HistoricDTO.getPortfolioHistory(from, to, tickers, con)
+      .then((result) => {
+        res.send(result);
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+
+  });
   
   app.get("/graphs/types/sim_types", function (req, res) {
   
@@ -183,7 +251,7 @@ app.get("/graphs/:id", function (req, res) {
         .catch((err) => {
           console.log(err);
 
-          
+
         })
     })
     .catch((err) => {
@@ -215,6 +283,63 @@ app.get("/temporary/graphs/:type/:sim_type/:start/:end", function (req, res) {
     })
   
 
+});
+
+app.get('/hostorical/:start/:end', (req, res) => {
+  let start = req.params.start;
+  let end = req.params.end;
+
+  HistoricDTO.getDataBetweenDatesAll(start, end, con)
+    .then((result) => {
+      let data = result
+      let companies = {}
+      
+      data.forEach(element => {
+        let ticker = element.ticker
+        delete element["ticker"];
+        if(!(ticker in companies)){
+          companies[ticker] = []
+        }
+        companies[ticker].push(element);
+      });
+
+      res.send(companies);
+  })
+  .catch((err) => {
+    console.log(err);
+  })
+});
+
+app.get('/hostorical/:ticker/:start/:end', (req, res) => {
+  let ticker = req.params.ticker;
+  let start = req.params.start;
+  let end = req.params.end;
+
+  HistoricDTO.getDataBetweenDatesTicker(ticker, start, end, con)
+    .then((result) => {
+      res.send(result);
+  })
+  .catch((err) => {
+    console.log(err);
+  })
+});
+
+
+
+app.get('/spx/:from/:to', (req, res) => {
+  let ticker = "^GSPC";
+  let from = req.params.from;
+  let to = req.params.to;
+
+  yahooFinance.historical({
+    symbol: ticker,
+    from: from,
+    to: to,
+    period: 'd'  // 'd' (daily), 'w' (weekly), 'm' (monthly), 'v' (dividends only)
+  }, (err, quotes) => {
+    res.send(quotes);
+  });
+  
 });
 
 

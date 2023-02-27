@@ -78,7 +78,14 @@ const getType = (type) => {
     }
 }
 
+function subtractMonths(date, months) {
+    const dateCopy = new Date(date);
+    dateCopy.setMonth(dateCopy.getMonth() - months);
+    return dateCopy;
+}
+
 exports.getGraphFromDirectory = getGraphFromDirectory;
 exports.getDirectories = getDirectories;
 exports.resolveGraphs = resolveGraphs;
 exports.getType = getType;
+exports.subtractMonths = subtractMonths;
