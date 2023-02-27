@@ -129,7 +129,6 @@ class GraphDTO {
                         reject(err);
                     }else{
                         resolve(result);
-
                     }
             })
         });
