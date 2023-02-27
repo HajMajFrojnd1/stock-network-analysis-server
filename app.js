@@ -324,6 +324,8 @@ app.get('/hostorical/:ticker/:start/:end', (req, res) => {
   })
 });
 
+
+
 app.get('/spx/:from/:to', (req, res) => {
   let ticker = "^GSPC";
   let from = req.params.from;
@@ -339,8 +341,6 @@ app.get('/spx/:from/:to', (req, res) => {
   });
   
 });
-
-
 
 
 var server = app.listen(8081, function () {
