@@ -110,7 +110,7 @@ class GraphDTO {
 
     static getSimType(con){
         return new Promise((resolve,reject)=>{
-            con.query( "SELECT DISTINCT name FROM `Similarity_Type`",
+            con.query( "SELECT DISTINCT name, id FROM `Similarity_Type` ORDER BY id DESC",
                 (err,result)=>{
                     if(err){
                         reject(err);

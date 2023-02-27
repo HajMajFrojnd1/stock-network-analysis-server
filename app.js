@@ -37,22 +37,23 @@ con.connect((err) => {
   
   //let sql_company = "SELECT date FROM Daily_data WHERE stock_id = 1 AND DATE >= '2022-09-01' ORDER BY ABS(DATEDIFF('2022-09-01', date)) ASC";
   
-  //con.query("DELETE FROM Daily_data",(err, result) => console.log(result));
+  /*on.query("DELETE FROM Graph_Network WHERE id = 23586",(err, res) => {
+
+    console.log(res)
+
+  });*/
     
 
 
+
   /*helper.resolveGraphs(
-    helper.getDirectories("C:/Users/patri/Desktop/gauss-complete/8_day")
+    helper.getDirectories("C:/Users/patri/Desktop/dump/parsed_data/1_day")
     .map((directory) => helper.getGraphFromDirectory(directory)),
-    2,
+    1,
     con
-  );
-  helper.resolveGraphs(
-    helper.getDirectories("C:/Users/patri/Desktop/gauss-complete/9_day")
-    .map((directory) => helper.getGraphFromDirectory(directory)),
-    2,
-    con
-    );*/
+  );*/
+  
+  
     
   /*con.query("ALTER TABLE Daily_data MODIFY volume BIGINT NOT NULL",(err, res) => {
       if(err){

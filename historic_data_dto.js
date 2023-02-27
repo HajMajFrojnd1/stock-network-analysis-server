@@ -62,7 +62,7 @@ class HistoricDTO {
                     result.forEach(element => {
                         element.date.addHours(2);
                     });
-                    for(let i = 0; i < result.length; i+=Math.floor(result.length/8)) {
+                    for(let i = 0; i < result.length; i+=Math.ceil(result.length/8)) {
                         dates.push(result[i].date.toISOString().split("T")[0]);
                     }
                     con.query(
