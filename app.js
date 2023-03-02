@@ -7,7 +7,7 @@ const cors = require('cors');
 const helper = require("./utilityFunctions.js");
 const GraphDTO = require('./graph_dto.js');
 const HistoricDTO = require('./historic_data_dto.js');
-const yahooFinance = require('yahoo-finance2').default
+const yahooFinance = require('yahoo-finance')
  
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -55,7 +55,7 @@ con.connect((err) => {
   
   
     
-  /*con.query("ALTER TABLE Daily_data MODIFY volume BIGINT NOT NULL",(err, res) => {
+  /*con.query("SELECT (SELECT COUNT(*) FROM Edge WHERE graph = g.id) as edges FROM Graph_Network g WHERE g.similarity_type = 2 AND aggregate = 1",(err, res) => {
       if(err){
         console.log(err);
       }  
@@ -340,6 +340,31 @@ app.get('/spx/:from/:to', (req, res) => {
     res.send(quotes);
   });
   
+});
+
+app.get("/spx/candlesticks", (req,res) => {
+  con.query("SELECT (SELECT COUNT(*) FROM Edge WHERE graph = g.id) as edges " + 
+            "FROM Graph_Network g " + 
+            "WHERE g.similarity_type = 2 AND aggregate = 1 " + 
+            "ORDER BY g.start DESC",(err, result) => {
+    if(err){
+      console.log(err);
+    }  
+    let ticker = "^GSPC";
+    let from = "2007-01-03";
+    let to = "2022-10-17";
+
+    yahooFinance.historical({
+      symbol: ticker,
+      from: from,
+      to: to,
+      period: 'd'  // 'd' (daily), 'w' (weekly), 'm' (monthly), 'v' (dividends only)
+    }, (err, quotes) => {
+      res.send(quotes.map((quote, idx) => {
+        return {...quote,edges: result[idx].edges};
+      }));
+    });
+  });
 });
 
 
