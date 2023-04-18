@@ -25,6 +25,26 @@ class HistoricDTO {
         });
     }
 
+    static getDataBetweenDatesStartEnd(start,end,con){
+        return new Promise((resolve,reject)=>{
+            con.query("SELECT c.ticker, d.date, d.open, d.high, d.low, d.close FROM Company c " +
+                            " INNER JOIN Daily_data d ON c.id = d.stock_id " +
+                            " WHERE d.date = :start OR d.date = :end " +
+                            " ORDER BY d.date",
+                        {
+                            start:start,
+                            end:end
+                        },
+                (err,result)=>{
+                    if(err){
+                        reject(err);
+                    }else{
+                        resolve(result);
+                    }
+            })
+        });
+    }
+
     static getDataBetweenDatesTicker(start,end,ticker,con){
         return new Promise((resolve,reject)=>{
             con.query("SELECT c.ticker, d.date, d.open, d.high, d.low, d.close, d.volume FROM Company c " +

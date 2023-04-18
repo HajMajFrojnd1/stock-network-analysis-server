@@ -35,13 +35,13 @@ con.connect((err) => {
   console.log("Connected!");
 
   
-  //let sql_company = "SELECT date FROM Daily_data WHERE stock_id = 1 AND DATE >= '2022-09-01' ORDER BY ABS(DATEDIFF('2022-09-01', date)) ASC";
+  let sql_query = "select * from Similarity_Type";
   
-  /*on.query("DELETE FROM Graph_Network WHERE id = 23586",(err, res) => {
+  con.query(sql_query,(err, res) => {
 
     console.log(res)
 
-  });*/
+  });
     
 
 
@@ -290,6 +290,31 @@ app.get('/hostorical/:start/:end', (req, res) => {
   let end = req.params.end;
 
   HistoricDTO.getDataBetweenDatesAll(start, end, con)
+    .then((result) => {
+      let data = result
+      let companies = {}
+      
+      data.forEach(element => {
+        let ticker = element.ticker
+        delete element["ticker"];
+        if(!(ticker in companies)){
+          companies[ticker] = []
+        }
+        companies[ticker].push(element);
+      });
+
+      res.send(companies);
+  })
+  .catch((err) => {
+    console.log(err);
+  })
+});
+
+app.get('/hostor/:start/:end', (req, res) => {
+  let start = req.params.start;
+  let end = req.params.end;
+
+  HistoricDTO.getDataBetweenDatesTwo(start, end, con)
     .then((result) => {
       let data = result
       let companies = {}
