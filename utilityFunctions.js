@@ -76,6 +76,9 @@ const getType = (type) => {
     } else if (type === "year") {
         return 3;
     }
+    else if (type === "historical") {
+        return 4;
+    }
 }
 
 function subtractMonths(date, months) {

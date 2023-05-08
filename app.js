@@ -22,7 +22,7 @@ const con = mysql.createConnection({
   "host":"db-mysql-fra1-82542-do-user-13612104-0.b.db.ondigitalocean.com",
   "port":"25060",
   "user":"doadmin",
-  "password":"AVNS_zHy1PorZO9bMRWu5LA1",
+  "password":"",
   "database":"defaultdb",
   namedPlaceholders: true,
   supportBigNumbers: true,
@@ -35,7 +35,7 @@ con.connect((err) => {
   console.log("Connected!");
 
   
-  let sql_query = "select * from Similarity_Type";
+  let sql_query = "select * from `Similarity_Type`";
   
   con.query(sql_query,(err, res) => {
 
@@ -46,46 +46,13 @@ con.connect((err) => {
 
 
 
-  /*helper.resolveGraphs(
-    helper.getDirectories("C:/Users/patri/Desktop/dump/parsed_data/1_day")
+ /* helper.resolveGraphs(
+    helper.getDirectories("C:/Users/patri/Desktop/1_historical")
     .map((directory) => helper.getGraphFromDirectory(directory)),
-    1,
+    3,
     con
   );*/
-  
-  
-    
-  /*con.query("SELECT (SELECT COUNT(*) FROM Edge WHERE graph = g.id) as edges FROM Graph_Network g WHERE g.similarity_type = 2 AND aggregate = 1",(err, res) => {
-      if(err){
-        console.log(err);
-      }  
-      console.log(res);
-    }
-  );*/
 
-  
-  
-  /*let ticker = "^GSPC";
-  let from = "2007-01-03";
-  let to = "2022-10-18";
-  let id = 412;
-    yahooFinance.historical(ticker,{
-                            period1: from,
-                            period2: to,
-                            interval: '1d'  // 'd' (daily), 'w' (weekly), 'm' (monthly), 'v' (dividends only)
-                      })
-                    .then ((quotes) => {
-                      let q = quotes.map(({date, open, high, low, close, volume}) => {
-                        return [date.toISOString().split("T")[0],id,open,high,low,close,volume];
-                      })
-                      con.query("INSERT INTO Daily_data (date, stock_id, open, high, low, close, volume) VALUES ?", [q],(err, res) => {
-                        if(err){
-                          console.log(err);
-                        }  
-                        console.log(res);
-                        }
-                      );
-                    });*/
     
   });
 
